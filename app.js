@@ -28,11 +28,12 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
-  secret: 'ajajajajajaja', // replace with a strong secret
-  resave: false, 
+  secret: 'ajinajinshoppingsecretisajin',
+  resave: false,
   saveUninitialized: true,
-  cookie: { maxAge: 600000 }
-}));
+  store: MongoStore.create({ mongoUrl: 'mongodb+srv://ajinrajeshhillten:Zlkkf73UtUnnZBbU@bank.x6s92.mongodb.net/?retryWrites=true&w=majority&appName=bank' }),
+  cookie: { maxAge: 6000000 }
+})); 
 
 
 app.use('/', userRouter);
