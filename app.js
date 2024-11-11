@@ -28,12 +28,16 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 app.use(session({
   secret: 'ajinajinshoppingsecretisajin',
   resave: false,
-  saveUninitialized: true,
-  store: MongoStore.create({ mongoUrl: 'mongodb+srv://ajinrajeshhillten:Zlkkf73UtUnnZBbU@bank.x6s92.mongodb.net/?retryWrites=true&w=majority&appName=bank' }),
-  cookie: { maxAge: 6000000 }
+  saveUninitialized: false,
+  store: MongoStore.create({
+      mongoUrl: 'mongodb+srv://ajinrajeshhillten:Zlkkf73UtUnnZBbU@bank.x6s92.mongodb.net/?retryWrites=true&w=majority&appName=bank',
+      collectionName: 'sessions'
+  }),
+  cookie: { secure: false }
 })); 
 
 
