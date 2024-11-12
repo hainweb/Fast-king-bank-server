@@ -475,14 +475,15 @@ module.exports = {
                 const transactions = await db.get().collection(collection.TRANSATION_COLLECTION).aggregate([
                     {
                         $match: {
-                            // Match transactions where the 'to' field matches the userId
-                            $or: [
-                                { 'transations.to': userId },              // Match as a string
-                                { 'transations.to': objectIdUserId }       // Match as an ObjectId
-                            ]
+                            'transations.to': { $in: [userId, objectIdUserId] }  // Match 'to' field with user's own ID
                         }
                     },
-                    { $unwind: { path: '$transations', preserveNullAndEmptyArrays: true } }, // Preserve if no transactions
+                    { $unwind: { path: '$transations', preserveNullAndEmptyArrays: true } },
+                    {
+                        $match: {
+                            'transations.to': { $in: [userId, objectIdUserId] }  // Filter only credited transactions
+                        }
+                    },
                     {
                         $project: {
                             amount: '$transations.amount',
@@ -494,14 +495,14 @@ module.exports = {
                     {
                         $lookup: {
                             from: collection.USER_COLLECTION,
-                            let: { userId: '$user' }, // Use 'let' to pass the user variable
+                            let: { userId: '$user' },
                             pipeline: [
                                 {
                                     $match: {
                                         $expr: {
                                             $or: [
-                                                { $eq: ['$_id', '$$userId'] },  // Match as string if user is stored as string
-                                                { $eq: ['$_id', { $toObjectId: '$$userId' }] } // Match as ObjectId if needed
+                                                { $eq: ['$_id', '$$userId'] },
+                                                { $eq: ['$_id', { $toObjectId: '$$userId' }] }
                                             ]
                                         }
                                     }
@@ -510,7 +511,6 @@ module.exports = {
                             as: 'userDetails'
                         }
                     },
-
                     { $unwind: { path: '$userDetails', preserveNullAndEmptyArrays: true } },
                     {
                         $project: {
@@ -526,13 +526,14 @@ module.exports = {
                     }
                 ]).toArray();
 
-                console.log('result tran credited ', transactions);
+                console.log('User credited transactions: ', transactions);
                 resolve(transactions);
             } catch (error) {
                 reject(error);
             }
         });
     },
+
     getWalletTransation: (uid) => {
         return new Promise(async (resolve, reject) => {
 
@@ -546,10 +547,74 @@ module.exports = {
         })
     },
     addCheck: (details) => {
-        console.log('details',details);
-        
-        return new Promise((resolve, reject) => {
-   
+
+        details.status = true
+        details.Code = parseInt(details.Code)
+        console.log('details', details);
+        let response = {}
+        return new Promise(async (resolve, reject) => {
+            let check = await db.get().collection(collection.CHECK_COLLECTION).findOne({ Code: details.Code })
+            if (check) {
+                response.status = false
+                response.message = 'This code is already exist'
+                console.log('code is already exsist', check);
+                resolve(response)
+
+            } else {
+                db.get().collection(collection.CHECK_COLLECTION).insertOne(details)
+                response.status = true
+                resolve(response)
+            }
+        })
+    },
+    getCheck: (uid, code) => {
+        let response = {}
+        return new Promise(async (resolve, reject) => {
+            let isCode = await db.get().collection(collection.CHECK_COLLECTION).findOne({ Code: code })
+           
+            if (isCode) {
+                let Amount=isCode.Rs
+                console.log('code is in', isCode);
+                if (isCode.status) {
+
+                    let user = await db.get().collection(collection.USER_COLLECTION).findOne({ _id: new ObjectId(uid) })
+                    console.log(user);
+                    if (user) {
+                        let upAmount = await user.amount + parseInt(isCode.Rs)
+                        console.log('new amount', upAmount);
+
+                        let userData = await db.get().collection(collection.USER_COLLECTION).updateOne({ _id: new ObjectId(uid) },
+                            { $set: { amount: upAmount } })
+                        console.log(userData);
+                        response.status = true
+                        db.get().collection(collection.CHECK_COLLECTION).updateOne({Code:code},
+                            {
+                                $set:{status:false}
+                            }
+                        )
+                        let userLast = await db.get().collection(collection.USER_COLLECTION).findOne({ _id: new ObjectId(uid) })
+                        console.log('n', userLast);
+                        resolve({response,userLast,Amount})
+
+                    } else {
+                        response.message = "No user Please Login Again"
+                        response.status=false
+                        resolve(response)
+                    }
+                } else {
+                    response.message = "This Check is Already Claimed"
+                    response.status = false
+                    resolve(response)
+                }
+
+
+            } else {
+                response.message = "Code not found"
+                response.status = false
+                console.log('code not found');
+                resolve(response)
+
+            }
         })
     }
 

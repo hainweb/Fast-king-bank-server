@@ -3,6 +3,7 @@ var express = require('express');
 var router = express.Router();
 var userHelpers = require('../helpers/userhelpers');
 const { stat } = require('fs');
+const { use } = require('bcrypt/promises');
 
 /* GET home page. */
 router.get('/api/', function (req, res, next) {
@@ -52,7 +53,7 @@ router.post('/api/change-premium', (req, res) => {
 
 
 router.post('/api/deposit', (req, res) => {
- 
+
   console.log(req.body);
   userHelpers.deposite(req.session.user._id, req.body).then((response) => {
     req.session.user = response
@@ -173,8 +174,28 @@ router.get('/api/getWallet-transation', (req, res) => {
   })
 })
 
-router.get('/api/add-check',(req,res)=>{
-   userHelpers.addCheck(req.body)
+router.post('/api/add-check', (req, res) => {
+  console.log(req.body);
+
+  userHelpers.addCheck(req.body).then((response) => {
+    res.json(response)
+  })
+})
+router.post('/api/get-check', (req, res) => {
+  console.log(req.body);
+  console.log(req.body.code);
+
+  userHelpers.getCheck(req.session.user._id, req.body.code).then((response) => {
+    console.log(response);
+    if(response.status){
+    req.session.user = response.userLast
+    }
+    console.log('sesss', req.session.user);
+    res.json(response)
+
+
+  })
+
 })
 
 module.exports = router;

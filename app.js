@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const MongoStore = require('connect-mongo');
 var cors = require('cors')
 
 var userRouter = require('./routes/user');
@@ -11,7 +12,7 @@ var session = require('express-session')
 var app = express();
 
 app.use(cors({
-  origin: 'http://localhost:3000', // Allow frontend
+  origin: 'https://king-bank.onrender.com', // Allow frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'], // Fixed typo from 'Contend-Type' to 'Content-Type'
   credentials: true // Allow credentials (cookies/sessions)
@@ -27,12 +28,29 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(session({
-  secret: 'ajajajajajaja', // replace with a strong secret
-  resave: false, 
-  saveUninitialized: true,
-  cookie: { maxAge: 600000 }
-}));
+
+
+const sessionMiddleware = session({
+  secret: 'ajinajinshoppingsecretisajin',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: 'mongodb+srv://ajinrajeshhillten:Zlkkf73UtUnnZBbU@bank.x6s92.mongodb.net/?retryWrites=true&w=majority&appName=bank',
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60, // Session TTL (1 day)
+    autoRemove: 'native',
+    touchAfter: 24 * 3600 // Time period in seconds between session updates
+  }),
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+});
+// Add this before your routes
+app.set('trust proxy', 1);
+app.use(sessionMiddleware);
 
 
 app.use('/', userRouter);
