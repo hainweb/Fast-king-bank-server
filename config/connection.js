@@ -2,7 +2,7 @@ const { MongoClient } = require('mongodb');
 const state = { db: null };
 
 module.exports.connect = async function (done) {
-  const url = 'mongodb+srv://ajinrajeshhillten:Zlkkf73UtUnnZBbU@bank.x6s92.mongodb.net/?retryWrites=true&w=majority&appName=bank
+  const url = 'mongodb+srv://ajinrajeshhillten:Zlkkf73UtUnnZBbU@bank.x6s92.mongodb.net/?retryWrites=true&w=majority&appName=bank';
   const dbname = 'bank2';
 
   try {
