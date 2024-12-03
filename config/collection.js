@@ -3,5 +3,5 @@ module.exports = {
     ACCOUNT_COLLECTION:'account',
     TRANSATION_COLLECTION:'transation',
     WALLET_TRANSATION_COLLECTION:'walletTransation',
-    CHECK_COLLECTION:'check'
+    CHECK_COLLECTION:'check' 
 }
