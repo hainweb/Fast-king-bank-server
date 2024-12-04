@@ -12,7 +12,7 @@ var session = require('express-session')
 var app = express();
 
 app.use(cors({
-  origin: 'https://king-bank.onrender.com', // Allow frontend
+  origin: 'https://king-atm.onrender.com', // Allow frontend
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'], // Fixed typo from 'Contend-Type' to 'Content-Type'
   credentials: true // Allow credentials (cookies/sessions)
