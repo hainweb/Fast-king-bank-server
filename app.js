@@ -43,7 +43,7 @@ const sessionMiddleware = session({
   store: MongoStore.create({
     mongoUrl: 'mongodb+srv://ajinrajeshhillten:Zlkkf73UtUnnZBbU@bank.x6s92.mongodb.net/?retryWrites=true&w=majority&appName=bank',
     collectionName: 'sessions',
-    ttl: 24 * 60 * 60, // 1 day session
+    ttl: 30 * 24 * 60 * 60 * 1000, // 1 day session
     autoRemove: 'interval',
     autoRemoveInterval: 10 // Remove expired sessions every 10 minutes
   }),
