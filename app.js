@@ -4,7 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const MongoStore = require('connect-mongo');
-var cors = require('cors')
+var cors = require('cors') 
 
 var userRouter = require('./routes/user');
 const db = require('./config/connection')
